@@ -72,7 +72,18 @@ def add_data(data, datastore):
         'Time': time
     }]))
             
-    
+def load_log(datastore):
+    try:
+        with open('log.json', 'r') as data_log:
+            data = json.load(data_log)
+            datastore.extend(data)
+            data_log.close
+    except Exception as e:
+        print(f"Error loading to list: {e}")
+
+
+#Runs once on program start so that previous data isn't errased.     
+load_log(datastore)
 
 while True:
     aqi_data = receive_aqi_data()
