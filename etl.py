@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 
 datastore = []
 
+
 def get_date(input_time):
     parsed_time = datetime.strptime(input_time, '%a %b %d %H:%M:%S %Y')
     formatted_time = parsed_time.strftime('%b %d')
@@ -17,15 +18,36 @@ def convert_to_12hr_time(input_time):
 
     return formatted_time
 
-
-def day_old(current_time, time_log):
-    if time_log < current_time:
-        return True
-    else:
-        return False
-
-def average_data():
-    pass
+def average_data(datastore):
+    inside_avg = 0 
+    outside_avg = 0
+    entries = 0
+    if len(datastore) < 2:
+        print("No data to average")
+        return
+    
+    today = datastore[-1]
+    yesterday = datastore[-2] 
+    
+    if today[0] != yesterday[0]:
+        for entry in yesterday[1]:
+            try:
+                inside_avg += entry['Indoor AQI']
+                outside_avg += entry['Outdoor AQI']
+                entries += 1
+            except Exception as e:
+                print(f"Date has already been averaged. {e}")
+        if entries > 0:
+            inside_avg = int((inside_avg/entries))
+            outside_avg = int((outside_avg/entries))
+            
+            yesterday_avg_string = yesterday[0] + " Average"
+            
+            datastore[-2] = [yesterday_avg_string, 
+                             [{
+                                 "Indoor AQI": inside_avg,
+                                 "Outdoor AQI": outside_avg
+                             }]]
     #TODO: Implement average data function for data older than 24 hours
 
 
@@ -64,8 +86,8 @@ def add_data(data, datastore):
                     'Outdoor AQI': data['outside-aqi'],
                     'Time': time
                 })
-        return
-    
+            return
+        
     datastore.append((current_date, [{
         'Indoor AQI': data['inside-aqi'],
         'Outdoor AQI': data['outside-aqi'],
@@ -88,9 +110,7 @@ load_log(datastore)
 while True:
     aqi_data = receive_aqi_data()
     add_data(aqi_data, datastore)
-    #If data is older than a day, average that day's data
-    # if day_old(datastore[-1][aqi_data], prev_date):
-    #     average_data(datastore)
-    
+    #average the data if needed
+    average_data(datastore)
     log_aqi_data(datastore)
     time.sleep(60)
