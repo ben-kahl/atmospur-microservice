@@ -9,7 +9,7 @@ def handle_get_request():
         with open('log.json', 'r') as data_log:
             data = json.load(data_log)
             data_log.close()
-            return json.dumps(data)
+            return data
     except Exception as e:
         print(f"Error loading json: {e}")
 
