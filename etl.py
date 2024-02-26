@@ -1,8 +1,7 @@
 import requests, json, time
-from datetime import datetime, timedelta
+from datetime import datetime
 
 datastore = []
-
 
 def get_date(input_time):
     parsed_time = datetime.strptime(input_time, '%a %b %d %H:%M:%S %Y')
@@ -22,21 +21,18 @@ def average_data(datastore):
     inside_avg = 0 
     outside_avg = 0
     entries = 0
+    #Can't average if theres only one day!
     if len(datastore) < 2:
-        print("No data to average")
         return
     
     today = datastore[-1]
-    yesterday = datastore[-2] 
+    yesterday = datastore[-2]
     
     if today[0] != yesterday[0]:
         for entry in yesterday[1]:
-            try:
-                inside_avg += entry['Indoor AQI']
-                outside_avg += entry['Outdoor AQI']
-                entries += 1
-            except Exception as e:
-                print(f"Date has already been averaged. {e}")
+            inside_avg += entry['Indoor AQI']
+            outside_avg += entry['Outdoor AQI']
+            entries += 1
         if entries > 0:
             inside_avg = int((inside_avg/entries))
             outside_avg = int((outside_avg/entries))
@@ -48,7 +44,6 @@ def average_data(datastore):
                                  "Indoor AQI": inside_avg,
                                  "Outdoor AQI": outside_avg
                              }]]
-    #TODO: Implement average data function for data older than 24 hours
 
 
 def receive_aqi_data():
@@ -58,14 +53,6 @@ def receive_aqi_data():
         return aqi_to_log
     except requests.exceptions.RequestException as e:
         print(e)
-
-def send_avg_data(data):
-    try:
-        res = requests.post("http://aqi.arthurktripp.com:5000/api/data_tracking", json = data)
-        return res
-    except requests.exceptions.RequestException as e:
-        print(e)
-
 
 def log_aqi_data(aqi_data):
     try:
@@ -106,11 +93,14 @@ def load_log(datastore):
 
 #Runs once on program start so that previous data isn't errased.     
 load_log(datastore)
-
+    
 while True:
+    prev_len = len(datastore)
     aqi_data = receive_aqi_data()
     add_data(aqi_data, datastore)
     #average the data if needed
-    average_data(datastore)
+    #Only average when a new date entry has been made
+    if(len(datastore) > prev_len):
+        average_data(datastore)
     log_aqi_data(datastore)
     time.sleep(60)
