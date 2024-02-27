@@ -12,4 +12,4 @@ Data is returned as a json for the body.
 
 Communication Contract: 
 
-![ETL Communication Contract](https://github.com/ben-kahl/atmospur-microservice/assets/32250011/955cb0ca-dd21-405c-9290-a80d8e787288)
+![ETL Communication Contract](https://github.com/ben-kahl/atmospur-microservice/assets/32250011/e94a2bd1-04f6-44e7-8d96-c59b9b3e9838)
