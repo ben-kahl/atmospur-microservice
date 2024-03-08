@@ -24,22 +24,26 @@ def average_data(datastore):
     #Can't average if theres only one day!
     if len(datastore) < 2:
         return
+    #Most recent entry is always the current date
+    current_day = datastore[-1]
+    #Therefore, the entry before it is the previous date if run without stopping
+    date_to_avg = datastore[-2]
     
-    today = datastore[-1]
-    yesterday = datastore[-2]
-    
-    if today[0] != yesterday[0]:
-        for entry in yesterday[1]:
+    #Iterate through entries and average AQIs
+    if current_day[0] != date_to_avg[0]:
+        for entry in date_to_avg[1]:
             inside_avg += entry['Indoor AQI']
             outside_avg += entry['Outdoor AQI']
             entries += 1
+        #If there were any entries for that date, format it for storage.    
         if entries > 0:
             inside_avg = int((inside_avg/entries))
             outside_avg = int((outside_avg/entries))
             
-            yesterday_avg_string = yesterday[0] + " Average"
+            date_to_avg_string = date_to_avg[0] + " Average"
             
-            datastore[-2] = [yesterday_avg_string, 
+            #Store into JSON Datastore
+            datastore[-2] = [date_to_avg_string, 
                              [{
                                  "Indoor AQI": inside_avg,
                                  "Outdoor AQI": outside_avg
@@ -63,7 +67,7 @@ def log_aqi_data(aqi_data):
         print(f"Error writing to JSON: {e}")
 
 def add_data(data, datastore):
-    current_date = datetime.now().strftime('%b %d')
+    current_date = datetime.now().strftime('%Y-%m-%d')
     time = convert_to_12hr_time(data['aqi_time'])
     for entry in datastore:
         entry_date, entries = entry
